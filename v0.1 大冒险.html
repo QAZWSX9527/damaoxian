@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>大冒险游戏</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(to bottom, #1e3c72, #2a5298);
+            background-size: 400% 400%;
+            animation: gradientAnimation 10s ease infinite;
+            color: #fff;
+            text-align: center;
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            animation: fadeIn 2s ease-in-out;
+        }
+        .game-container {
+            max-width: 600px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+        }
+        .choices {
+            margin-top: 20px;
+        }
+        .choice-btn {
+            display: block;
+            margin: 10px auto;
+            padding: 10px 20px;
+            font-size: 1.2em;
+            color: #fff;
+            background: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .choice-btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: skewX(-45deg);
+            transition: left 0.3s ease;
+        }
+        .choice-btn:hover::after {
+            left: 100%;
+        }
+        .choice-btn:hover {
+            background: #0056b3;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .background-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+        .background-svg circle {
+            fill: rgba(255, 255, 255, 0.1);
+            animation: float 6s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+    </style>
+</head>
+<body>
+    <svg class="background-svg" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="10%" cy="20%" r="50"></circle>
+        <circle cx="80%" cy="30%" r="70"></circle>
+        <circle cx="50%" cy="70%" r="100"></circle>
+        <circle cx="90%" cy="80%" r="40"></circle>
+    </svg>
+    <h1>欢迎来到大冒险游戏</h1>
+    <div class="game-container">
+        <div id="game-text">
+            <p>尊敬的冒险者，请输入您的名字开始冒险：</p>
+            <input type="text" id="player-name" placeholder="输入您的名字" style="padding: 10px; font-size: 1em;">
+            <button class="choice-btn" onclick="startGame()">开始冒险</button>
+        </div>
+    </div>
+
+    <script>
+        let playerName = "";
+
+        function playClickSound() {
+            const audio = new Audio('https://www.soundjay.com/button/beep-07.wav');
+            audio.play();
+        }
+
+        function startGame() {
+            playClickSound();
+            const nameInput = document.getElementById("player-name");
+            playerName = nameInput.value.trim();
+            if (playerName === "") {
+                alert("请输入您的名字！");
+                return;
+            }
+            showText(`
+                伟大的 ${playerName} 开始了冒险之旅，第一站旅途选择：
+                <br>
+                1. 森林<br>
+                2. 沙漠
+            `, [
+                { text: "森林", action: () => { playClickSound(); forestAdventure(); } },
+                { text: "沙漠", action: () => { playClickSound(); desertAdventure(); } }
+            ]);
+        }
+
+        function showText(text, choices) {
+            const gameText = document.getElementById("game-text");
+            gameText.innerHTML = `<p>${text}</p>`;
+            const choicesDiv = document.createElement("div");
+            choicesDiv.className = "choices";
+            choices.forEach(choice => {
+                const button = document.createElement("button");
+                button.className = "choice-btn";
+                button.textContent = choice.text;
+                button.onclick = () => {
+                    playClickSound();
+                    choice.action();
+                };
+                choicesDiv.appendChild(button);
+            });
+            gameText.appendChild(choicesDiv);
+        }
+
+        function forestAdventure() {
+            showText(`
+                在森林中，${playerName} 遇到了精灵和白鹭，请问选择跟谁走？
+                <br>
+                1. 精灵<br>
+                2. 白鹭
+            `, [
+                { text: "精灵", action: () => showText(`恭喜 ${playerName} 选择了精灵，精灵带领 ${playerName} 找到了宝藏，冒险成功！`, []) },
+                { text: "白鹭", action: () => showText(`${playerName} 选择了白鹭，但不幸陷入了沼泽地，冒险失败！`, []) }
+            ]);
+        }
+
+        function desertAdventure() {
+            showText(`
+                在沙漠中，${playerName} 遇到了沙尘暴，前方有避难所，是否要前往？
+                <br>
+                1. 是<br>
+                2. 否
+            `, [
+                { text: "是", action: () => shelterAdventure() },
+                { text: "否", action: () => showText(`${playerName} 在躲避灾害的途中遭遇沙兽，冒险失败！`, []) }
+            ]);
+        }
+
+        function shelterAdventure() {
+            showText(`
+                避难所的人热心为你提供了食物和水，恭喜你平安度过了沙尘暴。
+                <br>
+                天色渐晚，要留在避难所过夜吗？
+                <br>
+                1. 是<br>
+                2. 否
+            `, [
+                { text: "是", action: () => showText(`${playerName} 夜宿避难所，遭遇小偷，被洗劫一空，冒险失败！`, []) },
+                { text: "否", action: () => showText(`${playerName} 选择了离开避难所，遇到了商队，商队带领 ${playerName} 找到了宝藏，冒险成功！`, []) }
+            ]);
+        }
+    </script>
+</body>
+</html>
